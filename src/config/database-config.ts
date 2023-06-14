@@ -5,16 +5,22 @@ export class DatabaseConfig implements Knex.Config {
   client?: string | typeof Knex.Client = ''
   migrations?: Knex.MigratorConfig = {}
   useNullAsDefault?: boolean = true
-  connection?: Knex.Sqlite3ConnectionConfig = {} as Knex.Sqlite3ConnectionConfig
+  connection?: Knex.Sqlite3ConnectionConfig | string =
+    {} as Knex.Sqlite3ConnectionConfig
 
   constructor() {
     if (!process.env.DATABASE_URL) {
       throw new Error('DATABASE_URL env not found')
     }
 
-    this.client = 'sqlite'
+    this.client = env.DATABASE_CLIENT
     this.useNullAsDefault = true
-    this.connection.filename = env.DATABASE_URL
+    this.connection =
+      env.DATABASE_CLIENT === 'sqlite'
+        ? {
+            filename: env.DATABASE_URL,
+          }
+        : env.DATABASE_URL
     this.migrations.extension = 'ts'
     this.migrations.directory = './db/migrations'
   }
